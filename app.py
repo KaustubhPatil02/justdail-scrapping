@@ -1,5 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 
 # Set up the WebDriver (replace with the path to your WebDriver executable if necessary)
@@ -8,16 +10,23 @@ driver = webdriver.Chrome()
 # Open the Justdial page (replace with the actual URL)
 url = "https://www.justdial.com/Mumbai/Hotels/nct-10255012"
 driver.get(url)
-time.sleep(3)  # Give the page time to load
 
+# Wait for the contact numbers to load using WebDriverWait
 try:
-    # Locate all contact number elements using XPath
-    contact_number_elements = driver.find_elements(By.XPATH, "//div[contains(@class, 'callNowAnchor')]//span[contains(@class, 'callcontent')]")
+    # Wait until the contact numbers are loaded in the page
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.XPATH, "//span[@class='jsx-915cb403736563fc callcontent callNowAnchor']"))
+    )
+
+    # Locate all contact number elements using the correct XPath
+    contact_number_elements = driver.find_elements(By.XPATH, "//span[@class='jsx-915cb403736563fc callcontent callNowAnchor']")
     
     # Check if any contact numbers were found
     if contact_number_elements:
         for index, contact_number_element in enumerate(contact_number_elements, start=1):
-            print(f"Contact Number {index} found:", contact_number_element.text)
+            # Extract the contact number text directly from the element using 'textContent'
+            contact_number = contact_number_element.get_attribute('textContent')
+            print(f"Contact Number {index} found: {contact_number.strip()}")
     else:
         print("No contact numbers found.")
 
