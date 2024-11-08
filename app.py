@@ -1,55 +1,34 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+import time
 
 # Set up the WebDriver (replace with the path to your WebDriver executable if necessary)
 driver = webdriver.Chrome()
 
-# Function to scrape contact details
-def scrape_contacts(url):
-    # Open the Justdial page
-    driver.get(url)
-    print("Page loaded.")  # Debugging statement
+# Open the Justdial page (replace with the actual URL)
+url = "https://www.justdial.com/jdmart/Mumbai/Occasionz-Events-Near-Shalom-Residency-Mira-Road-East/022PXX22-XX22-120123220004-D6Y2_BZDET/catalogue?nid=11236154"
+driver.get(url)
+time.sleep(3)  # Give the page time to load
 
-    try:
-        # Wait until the listings are present in the HTML
-        listings = WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.CLASS_NAME, 'store-details'))  # Replace with correct class name
-        )
-        print(f"Found {len(listings)} listings.")  # Debugging statement
+try:
+    # Locate the Address heading element
+    address_heading_element = driver.find_element(By.XPATH, "//div[@role='heading' and contains(@class, 'rightaside_title') and text()='Address']")
+    print("Address Heading found:", address_heading_element.text)
 
-        contacts = []
-        for listing in listings:
-            try:
-                # Extract the business name
-                name = listing.find_element(By.CLASS_NAME, 'name-class').text  # Replace with actual class
-                print(f"Business name found: {name}")  # Debugging statement
+    # Locate the actual address content element
+    address_content_element = driver.find_element(By.XPATH, "//address[contains(@class, 'aside_address')]")
+    print("Address Content found:", address_content_element.text)
 
-                # Extract the contact details
-                contact = listing.find_element(By.CLASS_NAME, 'contact-class').text  # Replace with actual class
-                print(f"Contact found: {contact}")  # Debugging statement
-                
-                contacts.append({'Name': name, 'Contact': contact})
-            except Exception as e:
-                print("Error extracting data:", e)  # Print any exceptions for debugging
-                pass
+    # Locate the Contact element using XPath
+    contact_element = driver.find_element(By.XPATH, "//div[contains(@class, 'aside_address') and contains(@class, 'color111') and text()='Contact']")
+    print("Contact element found:", contact_element.text)
 
-    except Exception as e:
-        print("No listings found or page took too long to load.", e)
-        contacts = []
+    # Locate the phone number element
+    phone_number_element = driver.find_element(By.XPATH, "//div[@id='catalogue_addr_shownum']//div[contains(@class, 'font16') and contains(@class, 'color007')]")
+    print("Phone Number found:", phone_number_element.text)
 
-    return contacts
-
-# Usage
-url = "https://www.justdial.com/Mumbai/Corporate-Party-Organisers/nct-11236154"  # Replace with actual URL
-contacts = scrape_contacts(url)
-
-# Output contacts in the terminal
-for contact in contacts:
-    print(f"Business Name: {contact['Name']}")
-    print(f"Contact: {contact['Contact']}")
-    print("-" * 30)  # Separator for readability
+except Exception as e:
+    print("Error finding an element:", e)
 
 # Close the browser
 driver.quit()
